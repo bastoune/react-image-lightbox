@@ -10,6 +10,8 @@ exports[`Snapshot Testing Lightbox renders properly" 1`] = `
   discourageDownloads={false}
   enableZoom={true}
   imageCaption={null}
+  imageCrossOrigin={null}
+  imageLoadErrorMessage="This image failed to load"
   imagePadding={10}
   imageTitle={null}
   keyRepeatKeyupBonus={40}
@@ -21,12 +23,20 @@ exports[`Snapshot Testing Lightbox renders properly" 1`] = `
   nextSrcThumbnail={null}
   onAfterOpen={[Function]}
   onCloseRequest={[Function]}
+  onImageLoad={[Function]}
   onImageLoadError={[Function]}
   onMoveNextRequest={[Function]}
   onMovePrevRequest={[Function]}
   prevLabel="Previous image"
   prevSrc={null}
   prevSrcThumbnail={null}
+  reactModalProps={
+    Object {
+      "appElement": <div
+        aria-hidden="true"
+      />,
+    }
+  }
   reactModalStyle={Object {}}
   toolbarButtons={null}
   wrapperClassName=""
@@ -34,6 +44,11 @@ exports[`Snapshot Testing Lightbox renders properly" 1`] = `
   zoomOutLabel="Zoom out"
 >
   <Modal
+    appElement={
+      <div
+        aria-hidden="true"
+      />
+    }
     ariaHideApp={true}
     bodyOpenClassName="ReactModal__Body--open"
     closeTimeoutMS={0}
@@ -68,6 +83,11 @@ exports[`Snapshot Testing Lightbox renders properly" 1`] = `
     }
   >
     <ModalPortal
+      appElement={
+        <div
+          aria-hidden="true"
+        />
+      }
       ariaHideApp={true}
       bodyOpenClassName="ReactModal__Body--open"
       closeTimeoutMS={0}
@@ -128,10 +148,10 @@ exports[`Snapshot Testing Lightbox renders properly" 1`] = `
       }
     >
       <div
+        aria-modal="true"
         className="ReactModal__Overlay ReactModal__Overlay--after-open"
         onClick={[Function]}
         onMouseDown={[Function]}
-        onMouseUp={[Function]}
         style={
           Object {
             "backgroundColor": "transparent",
@@ -171,7 +191,7 @@ exports[`Snapshot Testing Lightbox renders properly" 1`] = `
           tabIndex="-1"
         >
           <div
-            className="ril-outer outer outerAnimating  "
+            className="ril-outer ril__outer ril__outerAnimating  "
             onKeyDown={[Function]}
             onKeyUp={[Function]}
             onMouseDown={[Function]}
@@ -189,70 +209,122 @@ exports[`Snapshot Testing Lightbox renders properly" 1`] = `
             tabIndex="-1"
           >
             <div
-              className="ril-inner inner"
+              className="ril-inner ril__inner"
               onClick={[Function]}
             >
-              <img
-                alt="Image"
-                className="ril-image-current image"
-                draggable={false}
+              <div
+                className="ril-image-current ril__image ril-not-loaded"
                 key="/fake/image/src.jpgi0"
-                onDoubleClick={[Function]}
-                onDragStart={[Function]}
-                onWheel={[Function]}
-                src="/fake/image/src.jpg"
                 style={
                   Object {
                     "transform": "translate3d(0px,0px,0) scale3d(NaN,NaN,1)",
                   }
                 }
-              />
+              >
+                <div
+                  className="ril__loadingContainer"
+                >
+                  <div
+                    className="ril-loading-circle ril__loadingCircle ril__loadingContainer__icon"
+                  >
+                    <div
+                      className="ril-loading-circle-point ril__loadingCirclePoint"
+                      key="0"
+                    />
+                    <div
+                      className="ril-loading-circle-point ril__loadingCirclePoint"
+                      key="1"
+                    />
+                    <div
+                      className="ril-loading-circle-point ril__loadingCirclePoint"
+                      key="2"
+                    />
+                    <div
+                      className="ril-loading-circle-point ril__loadingCirclePoint"
+                      key="3"
+                    />
+                    <div
+                      className="ril-loading-circle-point ril__loadingCirclePoint"
+                      key="4"
+                    />
+                    <div
+                      className="ril-loading-circle-point ril__loadingCirclePoint"
+                      key="5"
+                    />
+                    <div
+                      className="ril-loading-circle-point ril__loadingCirclePoint"
+                      key="6"
+                    />
+                    <div
+                      className="ril-loading-circle-point ril__loadingCirclePoint"
+                      key="7"
+                    />
+                    <div
+                      className="ril-loading-circle-point ril__loadingCirclePoint"
+                      key="8"
+                    />
+                    <div
+                      className="ril-loading-circle-point ril__loadingCirclePoint"
+                      key="9"
+                    />
+                    <div
+                      className="ril-loading-circle-point ril__loadingCirclePoint"
+                      key="10"
+                    />
+                    <div
+                      className="ril-loading-circle-point ril__loadingCirclePoint"
+                      key="11"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
             <div
-              className="ril-toolbar toolbar"
+              className="ril-toolbar ril__toolbar"
             >
               <ul
-                className="ril-toolbar-left toolbarSide toolbarLeftSide"
+                className="ril-toolbar-left ril__toolbarSide ril__toolbarLeftSide"
               >
                 <li
-                  className="ril-toolbar__item toolbarItem"
+                  className="ril-toolbar__item ril__toolbarItem"
                 >
                   <span
-                    className="ril-toolbar__item__child toolbarItemChild"
+                    className="ril-toolbar__item__child ril__toolbarItemChild"
                   />
                 </li>
               </ul>
               <ul
-                className="ril-toolbar-right toolbarSide toolbarRightSide"
+                className="ril-toolbar-right ril__toolbarSide ril__toolbarRightSide"
               >
                 <li
-                  className="ril-toolbar__item toolbarItem"
+                  className="ril-toolbar__item ril__toolbarItem"
                 >
                   <button
                     aria-label="Zoom in"
-                    className="ril-zoom-in toolbarItemChild builtinButton zoomInButton"
+                    className="ril-zoom-in ril__toolbarItemChild ril__builtinButton ril__zoomInButton"
+                    disabled={false}
                     key="zoom-in"
                     onClick={[Function]}
                     type="button"
                   />
                 </li>
                 <li
-                  className="ril-toolbar__item toolbarItem"
+                  className="ril-toolbar__item ril__toolbarItem"
                 >
                   <button
                     aria-label="Zoom out"
-                    className="ril-zoom-out toolbarItemChild builtinButton zoomOutButton builtinButtonDisabled"
+                    className="ril-zoom-out ril__toolbarItemChild ril__builtinButton ril__zoomOutButton ril__builtinButtonDisabled"
+                    disabled={true}
                     key="zoom-out"
-                    onClick={[Function]}
                     type="button"
                   />
                 </li>
                 <li
-                  className="ril-toolbar__item toolbarItem"
+                  className="ril-toolbar__item ril__toolbarItem"
                 >
                   <button
                     aria-label="Close lightbox"
-                    className="ril-close ril-toolbar__item__child toolbarItemChild builtinButton closeButton"
+                    className="ril-close ril-toolbar__item__child ril__toolbarItemChild ril__builtinButton ril__closeButton"
                     key="close"
                     onClick={[Function]}
                     type="button"

@@ -1,4 +1,3 @@
-/* eslint-env jest */
 import { mount } from 'enzyme';
 import React from 'react';
 import Modal from 'react-modal';
@@ -11,6 +10,12 @@ Lightbox.loadStyles = jest.fn();
 const commonProps = {
   mainSrc: '/fake/image/src.jpg',
   onCloseRequest: () => {},
+};
+
+const extendedCommonProps = {
+  ...commonProps,
+  prevSrc: '/fake/image/src1.jpg',
+  nextSrc: '/fake/image/src2.jpg',
 };
 
 describe('Lightbox structure', () => {
@@ -81,12 +86,93 @@ describe('Lightbox structure', () => {
 });
 
 describe('Events', () => {
-  const mockAfterOpen = jest.fn();
+  const LOAD_FAILURE_SRC = 'LOAD_FAILURE_SRC';
+  const LOAD_SUCCESS_SRC = 'LOAD_SUCCESS_SRC';
+  let originalImageSrcProto;
+  beforeAll(() => {
+    originalImageSrcProto = Object.getOwnPropertyDescriptor(
+      global.Image.prototype,
+      'src'
+    );
 
-  mount(<Lightbox {...commonProps} onAfterOpen={mockAfterOpen} />);
+    Object.defineProperty(global.Image.prototype, 'src', {
+      set(src) {
+        if (src === LOAD_FAILURE_SRC) {
+          setTimeout(() => this.onerror(new Error('mock error')));
+        } else if (src === LOAD_SUCCESS_SRC) {
+          setTimeout(this.onload);
+        }
+      },
+    });
+  });
+
+  afterAll(() => {
+    Object.defineProperty(global.Image.prototype, 'src', originalImageSrcProto);
+  });
+
+  const mockFns = {
+    onAfterOpen: jest.fn(),
+    onCloseRequest: jest.fn(),
+    onMovePrevRequest: jest.fn(),
+    onMoveNextRequest: jest.fn(),
+    onImageLoad: jest.fn(),
+    onImageLoadError: jest.fn(),
+  };
+
+  const wrapper = mount(
+    <Lightbox {...extendedCommonProps} {...mockFns} animationDisabled />
+  );
 
   it('Calls onAfterOpen when mounted', () => {
-    expect(mockAfterOpen).toHaveBeenCalledTimes(1);
+    expect(mockFns.onAfterOpen).toHaveBeenCalledTimes(1);
+    expect(mockFns.onAfterOpen).toHaveBeenCalledWith();
+  });
+
+  it('Calls onMovePrevRequest when left button clicked', () => {
+    expect(mockFns.onMovePrevRequest).toHaveBeenCalledTimes(0);
+    wrapper.find('.ril-prev-button').simulate('click');
+    expect(mockFns.onMovePrevRequest).toHaveBeenCalledTimes(1);
+    expect(mockFns.onMovePrevRequest).not.toHaveBeenCalledWith();
+  });
+
+  it('Calls onMoveNextRequest when right button clicked', () => {
+    expect(mockFns.onMoveNextRequest).toHaveBeenCalledTimes(0);
+    wrapper.find('.ril-next-button').simulate('click');
+    expect(mockFns.onMoveNextRequest).toHaveBeenCalledTimes(1);
+    expect(mockFns.onMoveNextRequest).not.toHaveBeenCalledWith();
+  });
+
+  it('Calls onCloseRequest when close button clicked', () => {
+    expect(mockFns.onCloseRequest).toHaveBeenCalledTimes(0);
+    wrapper.find('.ril-close').simulate('click');
+    expect(mockFns.onCloseRequest).toHaveBeenCalledTimes(1);
+    expect(mockFns.onCloseRequest).not.toHaveBeenCalledWith();
+  });
+
+  it('Calls onImageLoad when image loaded', done => {
+    mockFns.onImageLoad.mockImplementationOnce((imageSrc, srcType, image) => {
+      expect(imageSrc).toEqual(LOAD_SUCCESS_SRC);
+      expect(srcType).toEqual('mainSrc');
+      expect(image).toBeInstanceOf(global.Image);
+      done();
+    });
+
+    expect(mockFns.onImageLoad).toHaveBeenCalledTimes(0);
+    wrapper.setProps({ mainSrc: LOAD_SUCCESS_SRC });
+  });
+
+  it('Calls onImageLoadError when image loaded', done => {
+    mockFns.onImageLoadError.mockImplementationOnce(
+      (imageSrc, srcType, image) => {
+        expect(imageSrc).toEqual(LOAD_FAILURE_SRC);
+        expect(srcType).toEqual('mainSrc');
+        expect(image).toBeInstanceOf(Error);
+        done();
+      }
+    );
+
+    expect(mockFns.onImageLoadError).toHaveBeenCalledTimes(0);
+    wrapper.setProps({ mainSrc: LOAD_FAILURE_SRC });
   });
 });
 
@@ -112,6 +198,7 @@ describe('Key bindings', () => {
   };
 
   it('Responds to close key binding', () => {
+    expect(mockCloseRequest).toHaveBeenCalledTimes(0);
     // Simulate ESC key press
     simulateKey(27);
     expect(mockCloseRequest).toHaveBeenCalledTimes(1);
@@ -148,7 +235,39 @@ describe('Key bindings', () => {
 
 describe('Snapshot Testing', () => {
   it('Lightbox renders properly"', () => {
-    const wrapper = mount(<Lightbox {...commonProps} />);
+    const wrapper = mount(
+      <Lightbox
+        {...commonProps}
+        reactModalProps={{ appElement: global.document.createElement('div') }}
+      />
+    );
     expect(wrapper).toMatchSnapshot();
+  });
+});
+
+describe('Error Testing', () => {
+  it('Should render the default error message', () => {
+    const wrapper = mount(<Lightbox {...commonProps} />);
+    wrapper.setState({
+      loadErrorStatus: { mainSrc: true },
+    });
+    wrapper.update();
+    expect(wrapper.find('div.ril__errorContainer')).toHaveText(
+      'This image failed to load'
+    );
+  });
+  it('Should render the specified error message', () => {
+    const wrapper = mount(<Lightbox {...commonProps} />);
+    const imageLoadErrorMessage = <p>Specified Error Message</p>;
+    wrapper.setState({
+      loadErrorStatus: { mainSrc: true },
+    });
+    wrapper.setProps({
+      imageLoadErrorMessage,
+    });
+    wrapper.update();
+    expect(wrapper.find('div.ril__errorContainer')).toContainReact(
+      imageLoadErrorMessage
+    );
   });
 });
